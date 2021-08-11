@@ -1,6 +1,10 @@
 import React from 'react';
 import axios from 'axios';
 
+// Import the uploaded file
+import file from './uploaded_file.pdf';
+import Display from '../Display/Display';
+
 class Upload extends React.Component {
     constructor(props) {
         super(props);
@@ -58,6 +62,7 @@ class Upload extends React.Component {
                         </div>
                     </div>
                 </form>
+                <Display uploadedFile={file} />
             </div>
         )
     }
