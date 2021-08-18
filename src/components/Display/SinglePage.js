@@ -1,5 +1,7 @@
 import React from 'react';
 import { Document, Page } from 'react-pdf/dist/esm/entry.webpack';
+import './Display.css';
+
 // Display annotations in PDF rendered by react-pdf
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 
@@ -37,8 +39,8 @@ class SinglePage extends React.Component {
         this.setState({
             pageNumber: this.state.pageNumber + offset
         });
-      }
-    
+    }
+
 
     nextPage() {
         this.changePage(1);
@@ -56,22 +58,25 @@ class SinglePage extends React.Component {
                     file={this.props.file}
                     options={{ workerSrc: "/pdf.worker.js" }}
                     onLoadSuccess={this.handleSuccessDocumentLoad}
+                    className='document'
                 >
                     {this.state.isLoading ? this.state.loadingStatus : <Page pageNumber={this.state.pageNumber} renderAnnotationLayer={true} renderInteractiveForms={true} />}
                 </Document>
-                <div>
-                    <p>Page {this.state.pageNumber || (this.state.numOfPages ? 1 : "--")} of {this.state.numOfPages || "--"}</p>
+                <div className='pageNavigator'>
                     <button
                         type="button"
                         disabled={this.state.pageNumber <= 1}
                         onClick={this.previousPage}
+                        className='btn btn-primary'
                     >
                         Previous
                     </button>
+                    <span>Page {this.state.pageNumber || (this.state.numOfPages ? 1 : "--")} of {this.state.numOfPages || "--"}</span>
                     <button
                         type="button"
                         disabled={this.state.pageNumber >= this.state.numOfPages}
                         onClick={this.nextPage}
+                        className='btn btn-primary'
                     >
                         Next
                     </button>
