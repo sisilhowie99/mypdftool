@@ -5,7 +5,6 @@ import './Display.css';
 // Display annotations in PDF rendered by react-pdf
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 
-
 class SinglePage extends React.Component {
     constructor(props) {
         super(props);
@@ -15,6 +14,7 @@ class SinglePage extends React.Component {
             isLoading: false,
             loadingStatus: ''
         }
+        this.handleDocumentLoading = this.handleDocumentLoading.bind(this);
         this.handleSuccessDocumentLoad = this.handleSuccessDocumentLoad.bind(this);
         this.changePage = this.changePage.bind(this);
         this.nextPage = this.nextPage.bind(this);
@@ -41,7 +41,6 @@ class SinglePage extends React.Component {
         });
     }
 
-
     nextPage() {
         this.changePage(1);
     }
@@ -50,13 +49,13 @@ class SinglePage extends React.Component {
         this.changePage(-1);
     }
 
-
     render() {
         return (
             <>
                 <Document
                     file={this.props.file}
                     options={{ workerSrc: "/pdf.worker.js" }}
+                    onLoadProgress={this.handleDocumentLoading}
                     onLoadSuccess={this.handleSuccessDocumentLoad}
                     className='document'
                 >
