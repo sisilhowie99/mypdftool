@@ -10,7 +10,7 @@ app.use(cors());
 
 // Create Multer instance using diskStorage engine to save uploaded files to machine's file system
 const storage = multer.diskStorage({
-    destination: './src/components/Upload',
+    destination: './src/resources/',
     filename: function(req, file, cb) {
         cb(null, `uploaded_file.pdf`);
     }
