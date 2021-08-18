@@ -68,9 +68,7 @@ function App() {
           <Create />
         </Route>
 
-        <Route path="/display">
-          <Display />
-        </Route>
+        <Route path="/display" render={props => <Display file={props} />} />
 
         <Route exact path="/">
           <Home />
