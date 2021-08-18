@@ -1,0 +1,11 @@
+.document {
+    border: 1px solid #000;
+}
+
+.pageNavigator {
+    margin: 20px auto;
+}
+
+span {
+    margin: auto 40px;
+}
