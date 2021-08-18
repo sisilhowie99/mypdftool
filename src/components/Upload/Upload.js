@@ -14,11 +14,12 @@ class Upload extends React.Component {
     }
 
     handleChange(e) {
-        console.log(e.target.files[0]);
+        const uploadedFile = e.target.files[0];
+        console.log(uploadedFile);
 
         // Save the uploaded file to component's state
         this.setState({
-            uploadedFile: e.target.files[0]
+            uploadedFile: uploadedFile
         })
     }
 
@@ -77,7 +78,12 @@ class Upload extends React.Component {
                 </form>
 
                 {/* Check if upload is successful then redirect user to Display, otherwise display empty string (nothing) */}
-                {this.state.isUploadSuccess ? <Redirect to='/display' /> : ""}
+                {/* {this.state.isUploadSuccess ? <Redirect to='/display' /> : ""} */}
+                {this.state.isUploadSuccess ? <Redirect
+                                                to={{
+                                                    pathname: '/display',
+                                                    state: this.state.uploadedFile
+                                                }} /> : ""}
             </div>
         );
     }
