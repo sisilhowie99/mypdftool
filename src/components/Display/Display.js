@@ -161,6 +161,32 @@ class Display extends React.Component {
         })
     }
 
+    handleTextInputChange(e) {
+        console.log(`${e.target.name}: ${e.target.value}`);
+    }
+
+    handleDropdownChange(e) {
+        console.log(`${e.target.name}: ${e.target.value}`);
+    }
+
+    handleCheckboxChange(e) {
+        // console.log(e.target.value);
+        let oldValue;
+        let newValue;
+        if(e.target.value === 'false') {
+            oldValue = false;
+        } else if(e.target.value === 'true') {
+            oldValue = true;
+        }
+        newValue = !oldValue;
+        // console.log(newValue);
+        console.log(`${e.target.name}: ${newValue}`);
+    }
+
+    handleRadioChange(e) {
+        console.log(`${e.target.name}: ${e.target.value}`);
+    }
+
     render() {
         return (
             <div className='container display-container'>
@@ -172,7 +198,7 @@ class Display extends React.Component {
                     return (
                         <div className='textfields'>
                             <label htmlFor={textfield.name} className='left'>{textfield.name}:</label>
-                            <input type='text' name={textfield.name} defaultValue={textfield.value} id={textfield.name} className='right' key={i.toString()} onChange={(e) => console.log(`${textfield.name}: ${e.target.value}`)} />
+                            <input type='text' name={textfield.name} defaultValue={textfield.value} id={textfield.name} className='right' key={i.toString()} onChange={this.handleTextInputChange} />
                         </div>
                     )
                 })}
@@ -182,7 +208,7 @@ class Display extends React.Component {
                     return (
                         <div className='checkboxes'>
                             <label htmlFor={checkbox.name} className='left'>{checkbox.name}</label>
-                            <input type="checkbox" name={checkbox.name} value={checkbox.value} defaultChecked={checkbox.value} id={checkbox.name} className='right' key={i.toString()} onChange={() => {checkbox.value = !checkbox.value; console.log(`${checkbox.name}: ${checkbox.value}`)}} />
+                            <input type="checkbox" name={checkbox.name} value={checkbox.value} defaultChecked={checkbox.value} id={checkbox.name} className='right' key={i.toString()} onChange={this.handleCheckboxChange} />
                         </div>
                     )
                 })}
@@ -196,7 +222,7 @@ class Display extends React.Component {
                                 return (
                                     <div>
                                         <label htmlFor={option[i]}>{option}</label>
-                                        <input type="radio" name={radio.name} value={option} id={option[i]} className='right' key={i.toString()} defaultChecked={option === radio.selectedRadio} onChange={() => console.log(`${radio.name}: ${option}`)} />
+                                        <input type="radio" name={radio.name} value={option} id={option[i]} className='right' key={i.toString()} defaultChecked={option === radio.selectedRadio} onChange={this.handleRadioChange} />
                                     </div>
                                 )
                             })}
@@ -209,7 +235,7 @@ class Display extends React.Component {
                     return (
                         <div className='dropdowns'>
                             <label htmlFor={dropdown.name}>{dropdown.name}:</label>
-                            <select name={dropdown.name} defaultValue={dropdown.options[0]} onChange={(e) => console.log(e.target.value)}>
+                            <select name={dropdown.name} defaultValue={dropdown.options[0]} onChange={this.handleDropdownChange}>
                                 {dropdown.options.map((option, i) => {
                                     return <option value={option} key={i}>{option}</option>
                                 })}
