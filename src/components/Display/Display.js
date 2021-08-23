@@ -92,10 +92,12 @@ class Display extends React.Component {
                     */
                     const dropdown = form.getDropdown(key);
                     const dropdownName = key;
+                    const selectedDropdown = dropdown.getSelected();
                     const dropdownOptions = dropdown.getOptions();
                     dropdowns.push({
                         name: dropdownName,
-                        options: dropdownOptions
+                        options: dropdownOptions,
+                        selectedDropdown
                     });
                     break;
                 case 'PDFCheckBox':
