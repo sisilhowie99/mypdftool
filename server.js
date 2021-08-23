@@ -4,8 +4,10 @@ const express = require('express');
 const app = express();
 const multer = require('multer');
 const cors = require('cors');
-// Use CORS for the server
+const bodyParser = require('body-parser');
+// Use CORS and bodyParser
 app.use(cors());
+app.use(bodyParser.json());
 
 
 // Create Multer instance using diskStorage engine to save uploaded files to machine's file system
@@ -36,6 +38,21 @@ app.post('/upload', upload, function(req, res) {
         console.log('Upload success');
         return res.status(200).send(req.file);
     })    
+})
+
+app.post('/modify', (req, res, next) => {
+    console.log('You clicked modify!');
+    // Print the request received
+    console.log(`from post /modify ${req.body}`);
+    // Redirect user to /modify in the front-end
+    res.redirect('http://localhost:3000/modify');
+})
+
+app.get('/modify', (req, res, next) => {
+    console.log(`in get /modify ${req.body}`);
+    console.log('get modify');
+    // Send response back to client
+    res.status(200).send('received in the backend');
 })
 
 const PORT = 8000;
