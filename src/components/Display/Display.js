@@ -1,6 +1,7 @@
 import React from 'react';
 // Import PDF-LIB library
 import { PDFDocument } from 'pdf-lib';
+import axios from 'axios';
 
 class Display extends React.Component {
     constructor(props) {
@@ -241,16 +242,20 @@ class Display extends React.Component {
     }
 
     handleModifyDoc() {
-        console.log('Document modified!');
+        // Create JSON object data
         const data = {
-            dropdowns: this.state.dropdowns,
-            checkboxes: this.state.checkboxes,
-            radios: this.state.radios,
-            textfields: this.state.textfields,
-            optionLists: this.state.optionLists
+            "dropdowns": this.state.dropdowns,
+            "checkboxes": this.state.checkboxes,
+            "radios": this.state.radios,
+            "textfields": this.state.textfields,
+            "optionLists": this.state.optionLists
         };
 
-        console.log(`Here is the data you submitted: ${JSON.stringify(data)}`);
+        // Pass the JSON data to backend at this URL
+        axios.post('http://localhost:8000/modify', data).then(res => {
+            // Print response received from backend
+            console.log(`response: ${res.data} - status code ${res.status}`);
+        })
     }
 
     handleSaveNewFile() {
@@ -325,7 +330,8 @@ class Display extends React.Component {
 
                 {/* Buttons */}
                 <div className="d-grid gap-2 col-6 mx-auto button-container">
-                    <a href='/modify' className="btn btn-primary" type="button" onClick={this.handleModifyDoc}>Modify</a>
+                    {/* <a href='/modify' className="btn btn-primary" type="button" onClick={this.handleModifyDoc}>Modify</a> */}
+                    <button className="btn btn-primary" type="button" onClick={this.handleModifyDoc}>Modify</button>
                     <a href="/create" className="btn btn-success" type="button" onClick={this.handleSaveNewFile}>Save to a new file</a>
                     <button className="btn btn-secondary" type="button" onClick={this.handleCancel}>Cancel</button>
                 </div>
