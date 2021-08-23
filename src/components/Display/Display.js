@@ -16,6 +16,12 @@ class Display extends React.Component {
         this.readFile = this.readFile.bind(this);
         this.extract = this.extract.bind(this);
         this.displayOptions = this.displayOptions.bind(this);
+        this.handleTextInputChange = this.handleTextInputChange.bind(this);
+        this.handleDropdownChange = this.handleDropdownChange.bind(this);
+        this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
+        this.handleRadioChange = this.handleRadioChange.bind(this);
+        this.handleModifyDoc = this.handleModifyDoc.bind(this);
+        this.handleSaveNewFile = this.handleSaveNewFile.bind(this);
     }
 
     componentDidMount() {
@@ -92,7 +98,7 @@ class Display extends React.Component {
                     */
                     const dropdown = form.getDropdown(key);
                     const dropdownName = key;
-                    const selectedDropdown = dropdown.getSelected();
+                    const selectedDropdown = dropdown.getSelected()[0];
                     const dropdownOptions = dropdown.getOptions();
                     dropdowns.push({
                         name: dropdownName,
@@ -164,29 +170,100 @@ class Display extends React.Component {
     }
 
     handleTextInputChange(e) {
-        console.log(`${e.target.name}: ${e.target.value}`);
+        // Access the textfields state array
+        let textfields = this.state.textfields;
+        // Find selected textfield based on its name, in the textfields state array
+        let textfield = textfields.find(textfield => textfield.name === e.target.name);
+        // Find the matched textfield's index
+        const index = textfields.findIndex(element => element.name === textfield.name);
+
+        // Change its value and save to a new variable
+        let newValue = e.target.value;
+        // Update the textfield's value with the new one
+        textfield.value = newValue;
+        // Update the textfield entry in the array via the index with the updated value entry
+        textfields[index] = textfield;
+
+        // Update the state array to the array with the updated textfield value
+        this.setState({
+            textfields: textfields
+        })
     }
 
     handleDropdownChange(e) {
-        console.log(`${e.target.name}: ${e.target.value}`);
+        let dropdowns = this.state.dropdowns;
+        let dropdown = dropdowns.find(dropdown => dropdown.name === e.target.name);
+        const index = dropdowns.findIndex(element => element.name === dropdown.name);
+
+        dropdown.selectedDropdown = e.target.value;
+        dropdowns[index] = dropdown;
+        const updatedDropdowns = dropdowns;
+
+        this.setState({
+            dropdowns: updatedDropdowns
+        })
     }
 
     handleCheckboxChange(e) {
-        // console.log(e.target.value);
-        let oldValue;
-        let newValue;
-        if(e.target.value === 'false') {
-            oldValue = false;
-        } else if(e.target.value === 'true') {
-            oldValue = true;
-        }
-        newValue = !oldValue;
-        // console.log(newValue);
-        console.log(`${e.target.name}: ${newValue}`);
+        // Access the checkboxes state array
+        let checkboxes = this.state.checkboxes;
+        // Find selected checkbox based on its name, in the checkboxes state array
+        let checkbox = checkboxes.find(checkbox => checkbox.name === e.target.name);
+        // Find the matched checkbox's index
+        const index = checkboxes.findIndex(element => element.name === checkbox.name);
+
+        // Change its value and save to a new variable
+        let newValue = !checkbox.value;
+        // Update the checkbox's value with the new one
+        checkbox.value = newValue;
+        // Update the checkbox entry in the array via the index with the updated value entry
+        checkboxes[index] = checkbox;
+
+        // Update the state array to the array with the updated checkbox value
+        this.setState({
+            checkboxes: checkboxes
+        })
     }
 
     handleRadioChange(e) {
-        console.log(`${e.target.name}: ${e.target.value}`);
+        let radios = this.state.radios;
+        let radio = radios.find(radio => radio.name === e.target.name);
+        const index = radios.findIndex(element => element.name === radio.name);
+
+        radio.selectedRadio = e.target.value;
+        radios[index] = radio;
+        const updatedRadios = radios;
+
+        this.setState({
+            radios: updatedRadios
+        })
+
+    }
+
+    handleModifyDoc() {
+        console.log('Document modified!');
+        const data = {
+            dropdowns: this.state.dropdowns,
+            checkboxes: this.state.checkboxes,
+            radios: this.state.radios,
+            textfields: this.state.textfields,
+            optionLists: this.state.optionLists
+        };
+
+        console.log(`Here is the data you submitted: ${JSON.stringify(data)}`);
+    }
+
+    handleSaveNewFile() {
+        console.log('Created a new document!');
+    }
+
+    handleCancel() {
+        let isCancel = window.confirm('Are you sure you want to cancel modifying this document?');
+        if (isCancel) {
+            alert('Document modification cancelled. Returning to homepage.');
+        } else {
+            console.log('Still modifying document');
+        }
     }
 
     render() {
@@ -237,7 +314,7 @@ class Display extends React.Component {
                     return (
                         <div className='dropdowns'>
                             <label htmlFor={dropdown.name}>{dropdown.name}:</label>
-                            <select name={dropdown.name} defaultValue={dropdown.options[0]} onChange={this.handleDropdownChange}>
+                            <select name={dropdown.name} defaultValue={dropdown.selectedDropdown} onChange={this.handleDropdownChange}>
                                 {dropdown.options.map((option, i) => {
                                     return <option value={option} key={i}>{option}</option>
                                 })}
@@ -248,9 +325,9 @@ class Display extends React.Component {
 
                 {/* Buttons */}
                 <div className="d-grid gap-2 col-6 mx-auto button-container">
-                    <a href="/modify" className="btn btn-primary" type="button">Modify</a>
-                    <a href="/create" className="btn btn-success" type="button">Save to a new file</a>
-                    <a href="/" className="btn btn-secondary" type="button">Cancel</a>
+                    <a href='/modify' className="btn btn-primary" type="button" onClick={this.handleModifyDoc}>Modify</a>
+                    <a href="/create" className="btn btn-success" type="button" onClick={this.handleSaveNewFile}>Save to a new file</a>
+                    <button className="btn btn-secondary" type="button" onClick={this.handleCancel}>Cancel</button>
                 </div>
             </div>
         )
