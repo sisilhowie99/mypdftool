@@ -111,17 +111,18 @@ class Display extends React.Component {
                     const radio = form.getRadioGroup(key);
                     // Prevent deselecting radio button if it's already selected
                     radio.disableOffToggling();
+                    // Get the radio button that's selected
+                    const selectedRadio = radio.getSelected();
                     const radioName = key;
                     const radioOptions = radio.getOptions();
                     radios.push({
                         name: radioName,
-                        options: radioOptions
+                        options: radioOptions,
+                        selectedRadio
                     });
                     break;
                 case 'PDFTextField':
                     const textfield = form.getTextField(key);
-                    const field = form.getField(key);
-                    console.log(field);
                     const textfieldName = key;
                     const textfieldValue = textfield.getText();
                     textfields.push({
@@ -167,21 +168,21 @@ class Display extends React.Component {
                 <hr />
 
                 {/* Display text fields */}
-                {this.state.textfields.map(textfield => {
+                {this.state.textfields.map((textfield, i) => {
                     return (
                         <div className='textfields'>
                             <label htmlFor={textfield.name} className='left'>{textfield.name}:</label>
-                            <input type='text' name={textfield.name} value={textfield.value} id={textfield.name} className='right' />
+                            <input type='text' name={textfield.name} defaultValue={textfield.value} id={textfield.name} className='right' key={i.toString()} onChange={(e) => console.log(`${textfield.name}: ${e.target.value}`)} />
                         </div>
                     )
                 })}
 
                 {/* Display checkboxes */}
-                {this.state.checkboxes.map(checkbox => {
+                {this.state.checkboxes.map((checkbox, i) => {
                     return (
                         <div className='checkboxes'>
                             <label htmlFor={checkbox.name} className='left'>{checkbox.name}</label>
-                            <input type="checkbox" name={checkbox.name} value={checkbox.value} checked={checkbox.value} id={checkbox.name} className='right' />
+                            <input type="checkbox" name={checkbox.name} value={checkbox.value} defaultChecked={checkbox.value} id={checkbox.name} className='right' key={i.toString()} onChange={() => {checkbox.value = !checkbox.value; console.log(`${checkbox.name}: ${checkbox.value}`)}} />
                         </div>
                     )
                 })}
@@ -195,7 +196,7 @@ class Display extends React.Component {
                                 return (
                                     <div>
                                         <label htmlFor={option[i]}>{option}</label>
-                                        <input type="radio" name={radio.name} value={option} id={option[i]} className='right' />
+                                        <input type="radio" name={radio.name} value={option} id={option[i]} className='right' key={i.toString()} defaultChecked={option === radio.selectedRadio} onChange={() => console.log(`${radio.name}: ${option}`)} />
                                     </div>
                                 )
                             })}
@@ -208,9 +209,9 @@ class Display extends React.Component {
                     return (
                         <div className='dropdowns'>
                             <label htmlFor={dropdown.name}>{dropdown.name}:</label>
-                            <select name={dropdown.name} selected={dropdown.options[0]}>
+                            <select name={dropdown.name} defaultValue={dropdown.options[0]} onChange={(e) => console.log(e.target.value)}>
                                 {dropdown.options.map((option, i) => {
-                                    return <option value={option}>{option}</option>
+                                    return <option value={option} key={i}>{option}</option>
                                 })}
                             </select>
                         </div>
