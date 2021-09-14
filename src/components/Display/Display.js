@@ -23,6 +23,10 @@ class Display extends React.Component {
         this.handleRadioChange = this.handleRadioChange.bind(this);
         this.handleModifyDoc = this.handleModifyDoc.bind(this);
         this.handleSaveNewFile = this.handleSaveNewFile.bind(this);
+        this.updateTextField = this.updateTextField.bind(this);
+        this.updateCheckbox = this.updateCheckbox.bind(this);
+        this.updateDropdown = this.updateDropdown.bind(this);
+        this.updateRadio = this.updateRadio.bind(this);
     }
 
     componentDidMount() {
@@ -171,35 +175,22 @@ class Display extends React.Component {
     }
 
     handleTextInputChange(e) {
-        // Access the textfields state array
-        let textfields = this.state.textfields;
+        // Create a copy of the textfields state array
+        let textfields = this.state.textfields.slice();
         // Find selected textfield based on its name, in the textfields state array
         let textfield = textfields.find(textfield => textfield.name === e.target.name);
         // Find the matched textfield's index
         const index = textfields.findIndex(element => element.name === textfield.name);
 
-        // Change its value and save to a new variable
-        let newValue = e.target.value;
         // Update the textfield's value with the new one
-        textfield.value = newValue;
+        textfield.value = e.target.value;
         // Update the textfield entry in the array via the index with the updated value entry
         textfields[index] = textfield;
-
         // Update the state array to the array with the updated textfield value
-        this.setState({
-            textfields: textfields
-        })
+        this.updateTextField(textfields);
     }
 
-    handleDropdownChange(e) {
-        let dropdowns = this.state.dropdowns;
-        let dropdown = dropdowns.find(dropdown => dropdown.name === e.target.name);
-        const index = dropdowns.findIndex(element => element.name === dropdown.name);
-
-        dropdown.selectedDropdown = e.target.value;
-        dropdowns[index] = dropdown;
-        const updatedDropdowns = dropdowns;
-
+    updateTextField(newTextFields) {
         this.setState({
             dropdowns: updatedDropdowns
         })
@@ -207,22 +198,42 @@ class Display extends React.Component {
 
     handleCheckboxChange(e) {
         // Access the checkboxes state array
-        let checkboxes = this.state.checkboxes;
+        let checkboxes = this.state.checkboxes.slice();
         // Find selected checkbox based on its name, in the checkboxes state array
         let checkbox = checkboxes.find(checkbox => checkbox.name === e.target.name);
         // Find the matched checkbox's index
         const index = checkboxes.findIndex(element => element.name === checkbox.name);
 
         // Change its value and save to a new variable
-        let newValue = !checkbox.value;
-        // Update the checkbox's value with the new one
-        checkbox.value = newValue;
+        checkbox.value = !checkbox.value;
         // Update the checkbox entry in the array via the index with the updated value entry
         checkboxes[index] = checkbox;
 
         // Update the state array to the array with the updated checkbox value
+        this.updateCheckbox(checkboxes);
+    }
+
+    updateCheckbox(newCheckboxes) {
         this.setState({
-            checkboxes: checkboxes
+            checkboxes: newCheckboxes
+        })
+    }
+
+    handleDropdownChange(e) {
+        let dropdowns = this.state.dropdowns.slice();
+        let dropdown = dropdowns.find(dropdown => dropdown.name === e.target.name);
+        const index = dropdowns.findIndex(element => element.name === dropdown.name);
+
+        dropdown.selectedDropdown = e.target.value;
+        dropdowns[index] = dropdown;
+        const updatedDropdowns = dropdowns;
+
+        this.updateDropdown(updatedDropdowns);
+    }
+
+    updateDropdown(newDropdowns) {
+        this.setState({
+            dropdowns: newDropdowns
         })
     }
 
@@ -235,26 +246,58 @@ class Display extends React.Component {
         radios[index] = radio;
         const updatedRadios = radios;
 
-        this.setState({
-            radios: updatedRadios
-        })
-
+        this.updateRadio(updatedRadios);
     }
 
-    handleModifyDoc() {
-        // Create JSON object data
-        const data = {
-            "dropdowns": this.state.dropdowns,
-            "checkboxes": this.state.checkboxes,
-            "radios": this.state.radios,
-            "textfields": this.state.textfields,
-            "optionLists": this.state.optionLists
-        };
+    updateRadio(newRadios) {
+        this.setState({
+            radios: newRadios
+        })
+    }
 
-        // Pass the JSON data to backend at this URL
-        axios.post('http://localhost:8000/modify', data).then(res => {
-            // Print response received from backend
-            console.log(`response: ${res.data} - status code ${res.status}`);
+    async handleModifyDoc() {
+        // current file with its current state
+        const file = this.state.file;
+        const form = file.getForm();
+
+        // Update dropdowns in the file
+        this.state.dropdowns.slice().forEach(item => {
+            const dropdown = form.getDropdown(item.name);
+            dropdown.select(item.selectedDropdown);
+        })
+
+        // Update checboxes
+        this.state.checkboxes.slice().forEach(item => {
+            const checkbox = form.getCheckBox(item.name);
+            if(item.value) {
+                checkbox.check();
+            } else {
+                checkbox.uncheck();
+            }
+        })
+
+        // Update radio buttons
+        this.state.radios.slice().forEach(item => {
+            const radio = form.getRadioGroup(item.name);
+            radio.select(item.selectedRadio);
+        })
+
+        // Update textfields
+        this.state.textfields.slice().forEach(item => {
+            const textfield = form.getTextField(item.name);
+            textfield.setText(item.value);
+        })
+
+        // save file - returned as fulfilled promise Uint8Array
+        const updatedFile = await file.save();
+        // console.log(updatedFile); // Uint8Array
+
+        // const response = await axios.post('http://localhost:8000/modify', updatedFile);
+        // console.log(response.data);
+
+        this.setState({
+            isModified: true,
+            newData: updatedFile
         })
     }
 
@@ -330,11 +373,12 @@ class Display extends React.Component {
 
                 {/* Buttons */}
                 <div className="d-grid gap-2 col-6 mx-auto button-container">
-                    {/* <a href='/modify' className="btn btn-primary" type="button" onClick={this.handleModifyDoc}>Modify</a> */}
                     <button className="btn btn-primary" type="button" onClick={this.handleModifyDoc}>Modify</button>
                     <a href="/create" className="btn btn-success" type="button" onClick={this.handleSaveNewFile}>Save to a new file</a>
                     <button className="btn btn-secondary" type="button" onClick={this.handleCancel}>Cancel</button>
                 </div>
+
+                {this.state.isModified ? <SinglePage file={{data: this.state.newData}} /> : '' }
             </div>
         )
     }
