@@ -7,14 +7,16 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 // Use CORS and bodyParser
 app.use(cors());
-app.use(bodyParser.json());
-
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
 
 // Create Multer instance using diskStorage engine to save uploaded files to machine's file system
 const storage = multer.diskStorage({
-    destination: './src/resources/',
+    destination: './src/resources/files/',
     filename: function(req, file, cb) {
-        cb(null, `uploaded_file.pdf`);
+        const fileExt = file.mimetype.split('/')[1];
+        let date = new Date().toDateString();
+        cb(null, `${date}-uploaded_file.${fileExt}`);
     }
 })
 

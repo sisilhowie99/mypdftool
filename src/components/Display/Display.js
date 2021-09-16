@@ -2,17 +2,22 @@ import React from 'react';
 // Import PDF-LIB library
 import { PDFDocument } from 'pdf-lib';
 import axios from 'axios';
+import SinglePage from './SinglePage';
 
 class Display extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             file: null,
+            fields: null,
             dropdowns: [],
             checkboxes: [],
             radios: [],
             textfields: [],
-            optionLists: []
+            optionLists: [],
+            isModified: false,
+            isSavedToNewFile: false,
+            newData: null
         }
         this.readFile = this.readFile.bind(this);
         this.extract = this.extract.bind(this);
@@ -192,7 +197,7 @@ class Display extends React.Component {
 
     updateTextField(newTextFields) {
         this.setState({
-            dropdowns: updatedDropdowns
+            textfields: newTextFields
         })
     }
 
@@ -374,7 +379,10 @@ class Display extends React.Component {
                 {/* Buttons */}
                 <div className="d-grid gap-2 col-6 mx-auto button-container">
                     <button className="btn btn-primary" type="button" onClick={this.handleModifyDoc}>Modify</button>
-                    <a href="/create" className="btn btn-success" type="button" onClick={this.handleSaveNewFile}>Save to a new file</a>
+                    {this.state.isModified ? <p>Document successfully modified</p> : ""}
+
+                    <button href="/create" className="btn btn-success" type="button" onClick={this.handleSaveNewFile}>Save to a new file</button>
+
                     <button className="btn btn-secondary" type="button" onClick={this.handleCancel}>Cancel</button>
                 </div>
 
