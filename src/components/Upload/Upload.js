@@ -1,6 +1,5 @@
 import React from "react";
 import axios from "axios";
-import { Redirect } from 'react-router-dom';
 
 class Upload extends React.Component {
     constructor(props) {
@@ -78,12 +77,7 @@ class Upload extends React.Component {
                 </form>
 
                 {/* Check if upload is successful then redirect user to Display, otherwise display empty string (nothing) */}
-                {/* {this.state.isUploadSuccess ? <Redirect to='/display' /> : ""} */}
-                {this.state.isUploadSuccess ? <Redirect
-                                                to={{
-                                                    pathname: '/display',
-                                                    state: this.state.uploadedFile
-                                                }} /> : ""}
+                {this.state.isUploadSuccess ? window.location.href = '/display' : ""}
             </div>
         );
     }

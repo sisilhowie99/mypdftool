@@ -1,6 +1,4 @@
 import React from 'react';
-// Import PDF-LIB library
-import { PDFDocument } from 'pdf-lib';
 import axios from 'axios';
 import SinglePage from './SinglePage';
 
@@ -8,20 +6,14 @@ class Display extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            file: null,
-            fields: null,
             dropdowns: [],
             checkboxes: [],
             radios: [],
             textfields: [],
-            optionLists: [],
             isModified: false,
             isSavedToNewFile: false,
             newData: null
         }
-        this.readFile = this.readFile.bind(this);
-        this.extract = this.extract.bind(this);
-        this.displayOptions = this.displayOptions.bind(this);
         this.handleTextInputChange = this.handleTextInputChange.bind(this);
         this.handleDropdownChange = this.handleDropdownChange.bind(this);
         this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
@@ -35,148 +27,18 @@ class Display extends React.Component {
     }
 
     componentDidMount() {
-        this.readFile();
-    }
-
-    readFile() {
-        // console.log(this.props.file.location.state);
-        const reader = new FileReader();
-        reader.readAsArrayBuffer(this.props.file.location.state);
-
-        reader.onload = async e => {
-            // console.log(reader.result);
-            const pdf = await PDFDocument.load(reader.result, { ignoreEncryption: true });
-            const fileTitle = pdf.getTitle();
-
+        axios.get('http://localhost:8000/display').then(res => {
+            // console.log(res.data);
+            const { dropdowns, checkboxes, textfields, radios } = res.data;
             this.setState({
-                file: pdf,
-                fileTitle
-            })
-
-            this.extract();
-        };
-    }
-
-    extract() {
-        // Grab the file
-        const file = this.state.file;
-        // Grab the form in the file
-        const form = file.getForm();
-        // Access all fields in the form - returned as an array
-        const formFields = form.getFields();
-
-        // An object that will contain field objects (field type and name)
-        let fields = {};
-
-        // Loop through the array of fields, store each in the object as fieldName: fieldType
-        formFields.forEach(field => {
-            const fieldType = field.constructor.name;
-            const fieldName = field.getName();
-            // console.log(`${fieldName}: ${fieldType}`);
-
-            // Store the fieldName and fieldType pair in the fields object
-            fields[fieldName] = fieldType;
+                dropdowns,
+                checkboxes,
+                textfields,
+                radios
+            });
+        }).catch(err => {
+            console.error(err);
         });
-
-        // Store the object in the component's state
-        this.setState({ fields });
-        // console.log(this.state.fields);
-        this.displayOptions();
-    }
-
-    displayOptions() {
-        const file = this.state.file;
-        const form = file.getForm();
-        const fields = this.state.fields;
-
-        // Array of field types
-        let dropdowns = [];
-        let checkboxes = [];
-        let radios = [];
-        let textfields = [];
-        let numfields = [];
-        let optionLists = [];
-
-        for (const key in fields) {
-            switch (fields[key]) {
-                case 'PDFDropdown':
-                    /*
-                        1. Get dropdown element with the given key/name
-                        2. Set the name and get the option values, then store as an object to append to the dropdowns array
-                            - dropdownName will be used in name attribute for the HTML tag
-                            - dropdownOptions will be used in value attribute for the HTML tag
-                    */
-                    const dropdown = form.getDropdown(key);
-                    const dropdownName = key;
-                    const selectedDropdown = dropdown.getSelected()[0];
-                    const dropdownOptions = dropdown.getOptions();
-                    dropdowns.push({
-                        name: dropdownName,
-                        options: dropdownOptions,
-                        selectedDropdown
-                    });
-                    break;
-                case 'PDFCheckBox':
-                    const checkbox = form.getCheckBox(key);
-                    const checkboxName = key;
-                    const checkboxValue = checkbox.isChecked();
-                    checkboxes.push({
-                        name: checkboxName,
-                        value: checkboxValue
-                    });
-                    break;
-                case 'PDFRadioGroup':
-                    const radio = form.getRadioGroup(key);
-                    // Prevent deselecting radio button if it's already selected
-                    radio.disableOffToggling();
-                    // Get the radio button that's selected
-                    const selectedRadio = radio.getSelected();
-                    const radioName = key;
-                    const radioOptions = radio.getOptions();
-                    radios.push({
-                        name: radioName,
-                        options: radioOptions,
-                        selectedRadio
-                    });
-                    break;
-                case 'PDFTextField':
-                    const textfield = form.getTextField(key);
-                    const textfieldName = key;
-                    const textfieldValue = textfield.getText();
-                    textfields.push({
-                        name: textfieldName,
-                        value: textfieldValue
-                    })
-                    break;
-                case 'PDFOptionList':
-                    const optionList = form.getOptionList(key);
-                    const optionListName = key;
-                    const optionListOptions = optionList.getOptions();
-                    optionLists.push({
-                        name: optionListName,
-                        options: optionListOptions
-                    });
-                    break;
-                default:
-                    // const field = form.getTextField(key);
-                    // const fieldName = key;
-                    // const fieldValue = field.getText();
-                    // textfields.push({
-                    //     name: fieldName,
-                    //     value: fieldValue
-                    // })
-                    break;
-            }
-        }
-
-        this.setState({
-            dropdowns,
-            checkboxes,
-            radios,
-            textfields,
-            numfields,
-            optionLists
-        })
     }
 
     handleTextInputChange(e) {
