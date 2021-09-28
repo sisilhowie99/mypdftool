@@ -18,7 +18,7 @@ class Display extends React.Component {
         this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
         this.handleRadioChange = this.handleRadioChange.bind(this);
         this.handleModifyDoc = this.handleModifyDoc.bind(this);
-        this.handleSaveNewFile = this.handleSaveNewFile.bind(this);
+        this.handleSaveToNewFile = this.handleSaveToNewFile.bind(this);
         this.updateTextField = this.updateTextField.bind(this);
         this.updateCheckbox = this.updateCheckbox.bind(this);
         this.updateDropdown = this.updateDropdown.bind(this);
@@ -141,7 +141,20 @@ class Display extends React.Component {
         }).catch(err => console.error(err));
     }
 
-    handleSaveNewFile() {
+    handleSaveToNewFile() {
+        axios.post('http://localhost:8000/modify-to_new_file', {
+            dropdowns: this.state.dropdowns,
+            textfields: this.state.textfields,
+            checkboxes: this.state.checkboxes,
+            radios: this.state.radios
+        }).then(res => {
+            console.log(res);
+            console.log(res.data);
+
+            this.setState({
+                isModified: true
+            })
+        }).catch(err => console.error(err));
         console.log('Created a new document!');
     }
 
@@ -216,7 +229,7 @@ class Display extends React.Component {
                     <button className="btn btn-primary" type="button" onClick={this.handleModifyDoc}>Modify</button>
                     {this.state.isModified ? <p>Document successfully modified</p> : ""}
 
-                    <button href="/create" className="btn btn-success" type="button" onClick={this.handleSaveNewFile}>Save to a new file</button>
+                    <button href="/create" className="btn btn-success" type="button" onClick={this.handleSaveToNewFile}>Save to a new file</button>
 
                     <button className="btn btn-secondary" type="button" onClick={this.handleCancel}>Cancel</button>
                 </div>

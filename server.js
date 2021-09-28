@@ -216,11 +216,63 @@ app.post('/modify', async (req, res, next) => {
     });
 })
 
-app.get('/modify', (req, res, next) => {
-    console.log(`in get /modify ${req.body}`);
-    console.log('get modify');
-    // Send response back to client
-    res.status(200).send('received in the backend');
+app.post('/modify-to_new_file', async (req, res, next) => {
+    const data = req.body;
+    // fields - all are arrays of objects
+    let dropdowns = data.dropdowns;
+    let textfields = data.textfields;
+    let checkboxes = data.checkboxes;
+    let radios = data.radios;
+
+    // console.log(dropdowns);
+    // console.log(textfields);
+    // console.log(checkboxes);
+    // console.log(radios);
+
+    // Load the original file
+    let savedOriginalFile = fs.readFileSync(`./src/resources/files/${new Date().toDateString()}-uploaded_file.pdf`);
+    const originalFile = await PDFDocument.load(savedOriginalFile);
+    const form = originalFile.getForm();
+
+    // Update the fields on original file to new ones
+    dropdowns.forEach(item => {
+        const dropdown = form.getDropdown(item.name);
+        dropdown.select(item.selectedDropdown);
+    });
+
+    checkboxes.forEach(item => {
+        const checkbox = form.getCheckBox(item.name);
+        if(item.value) {
+            checkbox.check();
+        } else {
+            checkbox.uncheck();
+        }
+    });
+
+    radios.forEach(item => {
+        const radio = form.getRadioGroup(item.name);
+        radio.select(item.selectedRadio);
+    });
+
+    textfields.forEach(item => {
+        const textfield = form.getTextField(item.name);
+        textfield.setText(item.value);
+    });
+
+    // save the changes
+    const updatedFile = await originalFile.save();
+
+    // save to original file
+    fs.writeFileSync(`./src/resources/files/MODIFIED-${new Date().toDateString()}-uploaded_file.pdf`, updatedFile, function(err, data) {
+        if(err) {
+            console.error(err);
+            res.status(500).send('Error encountered! File modification not saved.');
+        } else {
+            console.log(data);
+            console.log('Document modified');
+            res.status(200).send('Document modified');
+        }
+    });
 })
 
 const PORT = 8000;
