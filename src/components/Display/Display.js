@@ -1,6 +1,5 @@
 import React from 'react';
 import axios from 'axios';
-import SinglePage from './SinglePage';
 
 class Display extends React.Component {
     constructor(props) {
@@ -122,50 +121,24 @@ class Display extends React.Component {
         })
     }
 
-    async handleModifyDoc() {
-        // current file with its current state
-        const file = this.state.file;
-        const form = file.getForm();
+    handleModifyDoc() {
+        // console.log(this.state.dropdowns);
+        // console.log(this.state.textfields);
+        // console.log(this.state.checkboxes);
+        // console.log(this.state.radios);
+        axios.post('http://localhost:8000/modify', {
+            dropdowns: this.state.dropdowns,
+            textfields: this.state.textfields,
+            checkboxes: this.state.checkboxes,
+            radios: this.state.radios
+        }).then(res => {
+            console.log(res);
+            console.log(res.data);
 
-        // Update dropdowns in the file
-        this.state.dropdowns.slice().forEach(item => {
-            const dropdown = form.getDropdown(item.name);
-            dropdown.select(item.selectedDropdown);
-        })
-
-        // Update checboxes
-        this.state.checkboxes.slice().forEach(item => {
-            const checkbox = form.getCheckBox(item.name);
-            if(item.value) {
-                checkbox.check();
-            } else {
-                checkbox.uncheck();
-            }
-        })
-
-        // Update radio buttons
-        this.state.radios.slice().forEach(item => {
-            const radio = form.getRadioGroup(item.name);
-            radio.select(item.selectedRadio);
-        })
-
-        // Update textfields
-        this.state.textfields.slice().forEach(item => {
-            const textfield = form.getTextField(item.name);
-            textfield.setText(item.value);
-        })
-
-        // save file - returned as fulfilled promise Uint8Array
-        const updatedFile = await file.save();
-        // console.log(updatedFile); // Uint8Array
-
-        // const response = await axios.post('http://localhost:8000/modify', updatedFile);
-        // console.log(response.data);
-
-        this.setState({
-            isModified: true,
-            newData: updatedFile
-        })
+            this.setState({
+                isModified: true
+            })
+        }).catch(err => console.error(err));
     }
 
     handleSaveNewFile() {
@@ -247,8 +220,6 @@ class Display extends React.Component {
 
                     <button className="btn btn-secondary" type="button" onClick={this.handleCancel}>Cancel</button>
                 </div>
-
-                {this.state.isModified ? <SinglePage file={{data: this.state.newData}} /> : '' }
             </div>
         )
     }
