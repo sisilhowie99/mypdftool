@@ -162,6 +162,7 @@ class Display extends React.Component {
         let isCancel = window.confirm('Are you sure you want to cancel modifying this document?');
         if (isCancel) {
             alert('Document modification cancelled. Returning to homepage.');
+            window.location.href = '/';
         } else {
             console.log('Still modifying document');
         }
