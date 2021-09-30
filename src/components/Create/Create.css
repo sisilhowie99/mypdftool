@@ -1,0 +1,15 @@
+label {
+    width: 25%;
+    height: auto;
+    text-align: left;
+}
+
+input, select {
+    width: 25%;
+    height: auto;
+    margin: 10px auto 10px 5px;
+}
+
+button {
+    margin: 10px;
+}

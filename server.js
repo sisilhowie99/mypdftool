@@ -5,7 +5,7 @@ const app = express();
 const multer = require('multer');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { PDFDocument } = require('pdf-lib');
+const { PDFDocument, StandardFonts, rgb, PageSizes } = require('pdf-lib');
 const fs = require('fs');
 // Use CORS and bodyParser
 app.use(cors());
@@ -42,6 +42,102 @@ app.post('/upload', upload, function(req, res) {
         console.log('Upload success');
         return res.status(200).send(req.file);
     })    
+})
+
+app.post('/create', async (req, res, next) => {
+    // console.log('printed from server side');
+    console.log(req.body);
+
+    const filename = req.body.filename;
+    const author = req.body.author;
+    const fields = req.body.fields;
+
+    // create PDFDocument instance
+    const pdf = await PDFDocument.create();
+    // set document metadata
+    pdf.setCreator(author);
+    pdf.setAuthor(author);
+    pdf.setCreationDate(new Date());
+    pdf.setTitle(filename, { showInWindowTitleBar: true });
+    // embed font into the document
+    const font = await pdf.embedFont(StandardFonts.Helvetica);
+
+    // add blank page to the document, use defined A4 size for it
+    const page = pdf.addPage(PageSizes.A4);
+    // get page sizes
+    const { width, height } = page.getSize();
+    // set default font and fontsize
+    page.setFont(font);
+    page.setFontSize(20);
+    page.setFontColor(rgb(0, 0, 0,));
+
+    // get form on the page
+    const form = pdf.getForm();
+
+    // Loop through the fields, create input fields based on the type, use its name property and give position based on coordinates
+    fields.forEach(inputField => {
+        // check the fieldtype
+        inputField.x = Number(inputField.x);
+        inputField.y = Number(inputField.y);
+        switch(inputField.type) {
+            case 'dropdown':
+                // console.log(inputField.options);
+                page.drawText(inputField.name, {x: inputField.x, y: inputField.y - 15});
+                const dropdown = form.createDropdown(inputField.name);
+                dropdown.addOptions(inputField.options);
+                dropdown.select(inputField.options[0]);
+                dropdown.addToPage(page, {x: inputField.x, y: inputField.y});
+                break;
+            case 'textfield':
+                page.drawText(inputField.name, {x: inputField.x, y: inputField.y - 15});
+                const textfield = form.createTextField(inputField.name);
+                textfield.addToPage(page, {x: inputField.x, y: inputField.y});
+                break;
+            case 'checkbox':
+                console.log(inputField.options);
+                page.drawText(inputField.name, {x: inputField.x, y: inputField.y - 15});
+
+                for(let option = 0; option < inputField.options.length; option++) {
+                    // add text for the input field (i.e., checkbox)
+                    page.drawText(inputField.options[option], {x: inputField.x, y: inputField.y -= 3});
+                    // create the actual checkbox
+                    const checkbox = form.createCheckBox(`${inputField.name}.${inputField.options[option]}`);
+                    // add checkbox to the page
+                    checkbox.addToPage(page, {x: inputField.x, y: inputField.y -= 3})
+                }
+                break;
+            case 'radio':
+                // console.log(inputField.options);
+                page.drawText(inputField.name, {x: inputField.x, y: inputField.y - 15});
+
+                // create the actual radio group
+                const radio = form.createRadioGroup(inputField.name);
+                for(let option = 0; option < inputField.options.length; option++) {
+                    // add text for the input field (i.e., radio)
+                    page.drawText(inputField.options[option], {x: inputField.x, y: inputField.y -= 3});
+                    radio.addOptionToPage(inputField.options[option], page, {x: inputField.x, y: inputField.y -= 1});
+                }
+                break;
+            default:
+                // create a textfield by default
+                page.drawText(inputField.name, {x: inputField.x, y: inputField.y - 15});
+                const defaultField = form.createTextField(inputField.name);
+                defaultField.addToPage(page, {x: inputField.x, y: inputField.y});
+                break;
+        }
+    });
+
+    // save document
+    const createdPdf = await pdf.save();
+    fs.writeFileSync(`./src/resources/files/CREATED-${new Date().toDateString()}-created_file.pdf`, createdPdf, function(err, data) {
+        if(err) {
+            console.error(err);
+            res.status(500).send('Error encountered! File creation failed.');
+        } else {
+            console.log('Document created');
+            res.status(200).send('Document created');
+        }
+    });
 })
 
 app.get('/display', async (req, res, next) => {
