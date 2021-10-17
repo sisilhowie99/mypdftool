@@ -52,7 +52,7 @@ class Create extends React.Component {
         const data = new FormData();
 
         // Add key/value pair to the object
-        data.append("uploaded_file", this.state.uploadedFile);
+        data.append("created_uploaded_file", this.state.uploadedFile);
 
         // Make POST request using Axios, sending the data object to the url
         // The request returns a promise
@@ -220,7 +220,7 @@ class Create extends React.Component {
                                 className="form-control"
                                 type="file"
                                 id="formFile"
-                                name="uploaded_file"
+                                name="created_uploaded_file"
                                 accept=".pdf"
                                 onChange={this.handleUploadChange}
                             />

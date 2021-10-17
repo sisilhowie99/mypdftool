@@ -22,8 +22,18 @@ const storage = multer.diskStorage({
     }
 })
 
+const createStorage = multer.diskStorage({
+    destination: './src/resources/files/',
+    filename: function (req, file, cb) {
+        const fileExt = file.mimetype.split('/')[1];
+        let date = new Date().toDateString();
+        cb(null, `${date}-create_uploaded_file.${fileExt}`);
+    }
+})
+
 // upload instance handling a single file uploaded
 const upload = multer({ storage: storage }).single('uploaded_file');
+const createUpload = multer({ storage: createStorage }).single('created_uploaded_file');
 
 // POST route
 app.post('/upload', upload, function(req, res) {
@@ -140,6 +150,24 @@ app.post('/create', async (req, res, next) => {
             res.status(200).send('Document created');
         }
     });
+})
+
+app.post('/create-upload', createUpload, function(req, res) {
+    // Upload instance 
+    upload(req, res, function(err) {
+        // Check for errors (MulterError first then other errors)
+        if(err instanceof multer.MulterError) {
+            console.log('There\'s a MulterError.');
+            return res.status(500).json(err);
+        } else if(err) {
+            console.log('There\'s another error (not MulterError).');
+            return res.status(500).json(err);
+        }
+
+        // console.log(req.file);          // the file uploaded
+        console.log('Upload success');
+        return res.status(200).send(req.file);
+    })  
 })
 
 app.get('/display', async (req, res, next) => {
