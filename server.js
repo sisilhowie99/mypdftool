@@ -66,6 +66,8 @@ app.post('/create', async (req, res, next) => {
     const page = pdf.addPage(PageSizes.A4);
     // get page sizes
     const { width, height } = page.getSize();
+
+    page.resetPosition();
     // set default font and fontsize
     page.setFont(font);
     page.setFontSize(20);
@@ -94,7 +96,7 @@ app.post('/create', async (req, res, next) => {
                 textfield.addToPage(page, {x: inputField.x, y: inputField.y});
                 break;
             case 'checkbox':
-                console.log(inputField.options);
+                // console.log(inputField.options);
                 page.drawText(inputField.name, {x: inputField.x, y: inputField.y - 15});
 
                 for(let option = 0; option < inputField.options.length; option++) {

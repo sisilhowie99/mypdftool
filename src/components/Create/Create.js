@@ -37,13 +37,6 @@ class Create extends React.Component {
         this.createPDF = this.createPDF.bind(this);
     }
 
-    componentDidUpdate(prevState) {
-        if(prevState.option !== this.state.option) {
-            // every time there's a change to DOM, after 1.5 seconds, the handleAddToOptionsList func gets called
-            setTimeout(this.handleAddToOptionsList(), 1500);
-        }
-    }
-
     handleUploadChange(e) {
         const uploadedFile = e.target.files[0];
         console.log(uploadedFile);
@@ -145,30 +138,32 @@ class Create extends React.Component {
     }
 
     handleAddToOptionsList() {
-        // clears current timer
-        clearTimeout(this.timer);
+        let options = this.state.options.slice();
+        // add the current options list's length
+        options.length++;
 
-        // restart a new timer
-        this.timer = setTimeout(() => {
-            let options = this.state.options.slice();
+        // target the last index (that was the newly added space) and add the new option to that index
+        options[options.length-1] = this.state.option;
+        console.log(options);
 
-            options.push(this.state.option);
-            console.log(options);
-
-            this.setState({
-                options,
-                field: {
-                    ...this.state.field,
-                    options
-                }
-            });
-            // clears timer so value doesn't get stored twice
-            clearTimeout(this.timer);
-        }, 2000);
+        this.setState({
+            options,
+            field: {
+                ...this.state.field,
+                options
+            }
+        });
     }
 
     handleAddNewOption(e) {
-        this.setState({ numOfOptions : this.state.numOfOptions + 1 });
+        // If no options listed, add 1 so an empty string doesn't gets added
+        // otherwise, add the new option to the list of options and add number of options
+        if(this.state.numOfOptions > 0) {
+            this.handleAddToOptionsList();
+            this.setState({ numOfOptions : this.state.numOfOptions + 1 });
+        } else {
+            this.setState({ numOfOptions : this.state.numOfOptions + 1 });
+        };
     }
 
     handleAddField() {
@@ -182,7 +177,6 @@ class Create extends React.Component {
     }
 
     createPDF() {
-        clearTimeout(this.timer);
         // grab the filename, author, input fields to create (including their names and locations on page)
         const filename = this.state.filename;
         const author = this.state.author;
@@ -265,6 +259,8 @@ class Create extends React.Component {
                         <input type='text' name='fieldName' id='fieldName' onChange={this.handleInputName} />
 
                         <br />
+
+                        <em><p>Please note coordinates matrix begin from (0,0) which bottom left corner</p></em>
 
                         <label htmlFor='coordX'>Coordinate X (position):</label>
                         <input type='number' name='coordX' id='coordX' onChange={this.handleCoordX} />
